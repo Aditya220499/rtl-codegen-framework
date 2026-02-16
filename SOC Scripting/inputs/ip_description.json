@@ -1,0 +1,24 @@
+{
+  "ips": [
+    {
+      "module": "cpu_core",
+      "instance": "u_cpu",
+      "ports": [
+        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "rst_n", "dir": "input", "width": 1},
+        {"name": "irq", "dir": "input", "width": 8},
+        {"name": "data_out", "dir": "output", "width": 32}
+      ]
+    },
+    {
+      "module": "dma_engine",
+      "instance": "u_dma",
+      "ports": [
+        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "rst_n", "dir": "input", "width": 1},
+        {"name": "data_in", "dir": "input", "width": 32},
+        {"name": "done", "dir": "output", "width": 1}
+      ]
+    }
+  ]
+}
