@@ -1,5 +1,5 @@
 **********************************************************************************************************************************************************************************
-1. SOC Scripting
+1.  SOC Scripting
 
 The template-driven approach allows RTL generation to remain flexible. The same metadata can generate:
 
