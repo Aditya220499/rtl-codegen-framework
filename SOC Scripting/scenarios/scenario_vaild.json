@@ -1,0 +1,36 @@
+{
+  "ips": [
+    {
+      "module": "cpu_core",
+      "instance": "u_cpu",
+      "ports": [
+        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "rst_n", "dir": "input", "width": 1},
+        {"name": "irq", "dir": "input", "width": 1},
+        {"name": "addr", "dir": "output", "width": 32},
+        {"name": "wdata", "dir": "output", "width": 32},
+        {"name": "ready", "dir": "input", "width": 1}
+      ]
+    },
+    {
+      "module": "memory_ctrl",
+      "instance": "u_mem",
+      "ports": [
+        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "rst_n", "dir": "input", "width": 1},
+        {"name": "addr", "dir": "input", "width": 32},
+        {"name": "wdata", "dir": "input", "width": 32},
+        {"name": "ready", "dir": "output", "width": 1}
+      ]
+    },
+    {
+      "module": "uart",
+      "instance": "u_uart",
+      "ports": [
+        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "rst_n", "dir": "input", "width": 1},
+        {"name": "irq", "dir": "output", "width": 1}
+      ]
+    }
+  ]
+}
