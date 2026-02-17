@@ -1,40 +1,43 @@
 **********************************************************************************************************************************************************************************
-# 1.  SOC Scripting
-
-# SoC Top Module Generator
+# SoC Integration Automation
 
 ## Overview
+
 This project demonstrates metadata-driven automation of SoC IP integration.
-Instead of manually wiring vendor IP blocks, this script:
+
+Instead of manually wiring vendor IP blocks, this tool:
 
 - Parses structured IP definitions (JSON)
-- Generates unique nets for each IP port
-- Uses a Jinja template to generate a SystemVerilog top module
-- Produces synthesizable RTL automatically
+- Automatically connects signals based on matching port names
+- Validates direction-based driver ownership
+- Detects width mismatches
+- Generates synthesizable SystemVerilog top-level RTL
 
-This approach reflects modern SoC integration workflows used in  semiconductor companies.
+This reflects modern SoC integration workflows used in semiconductor product companies.
 
 ---
 
 ## Project Structure
 
 ```
-soc-top-generator/
+soc-integration-automation/
 │
 ├── generate_top.py
-├── input/
-│   └── ip_description.json
 ├── templates/
 │   └── top_template.sv.j2
+├── scenarios/
+│   ├── scenario_valid.json
+│   └── scenario_error.json
 ├── output/
 │   └── top_generated.sv
+└── README.md
 ```
 
 ---
 
 ## Input Format
 
-`input/ip_description.json`
+Each JSON file defines IP blocks:
 
 ```json
 {
@@ -43,7 +46,7 @@ soc-top-generator/
       "module": "cpu_core",
       "instance": "u_cpu",
       "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
+        {"name": "irq", "dir": "input", "width": 1},
         {"name": "data_out", "dir": "output", "width": 32}
       ]
     }
@@ -52,10 +55,11 @@ soc-top-generator/
 ```
 
 Each IP requires:
+
 - Module name
 - Instance name
 - Port list
-- Direction
+- Direction (`input` / `output`)
 - Width
 
 ---
@@ -74,10 +78,16 @@ python -m pip install jinja2
 
 ## Execution
 
-From the project root directory:
+Run with a scenario file:
 
 ```
-python generate_top.py
+python generate_top.py scenarios/scenario_valid.json
+```
+
+or
+
+```
+python generate_top.py scenarios/scenario_error.json
 ```
 
 Output will be generated at:
@@ -88,28 +98,64 @@ output/top_generated.sv
 
 ---
 
+## Demonstration Scenarios
+
+### 1. Error Case – Multi-Driver Detection
+
+```
+python generate_top.py scenarios/scenario_error.json
+```
+
+Expected:
+
+```
+ValueError: Multiple drivers detected on signal 'irq'
+```
+
+Demonstrates electrical topology validation.
+
+---
+
+### 2. Valid SoC Connectivity
+
+```
+python generate_top.py scenarios/scenario_valid.json
+```
+
+Generated RTL demonstrates:
+
+- One driver per shared signal
+- Automatic input/output wiring
+- Width consistency enforcement
+- Safe electrical topology
+
+---
+
 ## Why This Matters
 
 Modern SoCs integrate many third-party IP blocks.
 
-Manual wiring does not scale.
+Manual top-level wiring does not scale.
 
 This automation framework enables:
 
-- Faster integration
-- Reduced human error
-- Regeneration when IP definitions change
-- Scalable SoC architecture
+- Scalable IP integration
+- Driver ownership validation
+- Early detection of structural design errors
+- Regeneration when metadata changes
+- Improved integration reliability
 
 ---
 
 ## Future Extensions
 
-- Parameter support
-- Width mismatch detection
-- Bus grouping (AXI/APB abstraction)
-- TCL script generation
-- Verification scaffold generation
+- Interrupt controller auto-generation
+- Arbitration detection
+- Unconnected port warnings
+- Bus protocol abstraction (AXI/APB)
+- CI-based regression validation
+- IP-XACT support
+
 
 
 **********************************************************************************************************************************************************************************
