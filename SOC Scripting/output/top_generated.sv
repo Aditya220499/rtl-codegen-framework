@@ -1,27 +1,42 @@
 // AUTO-GENERATED FILE
+// Do not edit manually
 
 module top;
 
+logic clk;
+logic rst_n;
 logic irq;
-logic [31:0] data_out;
+logic [31:0] addr;
+logic [31:0] wdata;
+logic ready;
 
 
 // Instance: u_cpu
-cpu u_cpu (
+cpu_core u_cpu (
+.clk(clk),
+.rst_n(rst_n),
 .irq(irq),
-.data_out(data_out)
+.addr(addr),
+.wdata(wdata),
+.ready(ready)
+
+);
+
+// Instance: u_mem
+memory_ctrl u_mem (
+.clk(clk),
+.rst_n(rst_n),
+.addr(addr),
+.wdata(wdata),
+.ready(ready)
 
 );
 
 // Instance: u_uart
 uart u_uart (
+.clk(clk),
+.rst_n(rst_n),
 .irq(irq)
-
-);
-
-// Instance: u_dma
-dma u_dma (
-.data_out(data_out)
 
 );
 
