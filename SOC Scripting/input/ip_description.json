@@ -1,41 +1,16 @@
 {
   "ips": [
     {
-      "module": "cpu_core",
+      "module": "cpu",
       "instance": "u_cpu",
       "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
-        {"name": "rst_n", "dir": "input", "width": 1},
-        {"name": "irq_global", "dir": "input", "width": 1},
-        {"name": "data_out", "dir": "output", "width": 32}
-      ]
-    },
-    {
-      "module": "dma_engine",
-      "instance": "u_dma",
-      "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
-        {"name": "rst_n", "dir": "input", "width": 1},
-        {"name": "data_in", "dir": "input", "width": 32},
-        {"name": "done", "dir": "output", "width": 1}
-      ]
-    },
-    {
-      "module": "memory_ctrl",
-      "instance": "u_mem",
-      "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
-        {"name": "rst_n", "dir": "input", "width": 1},
-        {"name": "wr_data", "dir": "input", "width": 32},
-        {"name": "ready", "dir": "output", "width": 1}
+        {"name": "irq", "dir": "input", "width": 1}
       ]
     },
     {
       "module": "uart",
       "instance": "u_uart",
       "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
-        {"name": "rst_n", "dir": "input", "width": 1},
         {"name": "irq", "dir": "output", "width": 1}
       ]
     },
@@ -43,8 +18,6 @@
       "module": "timer",
       "instance": "u_timer",
       "ports": [
-        {"name": "clk", "dir": "input", "width": 1},
-        {"name": "rst_n", "dir": "input", "width": 1},
         {"name": "irq", "dir": "output", "width": 1}
       ]
     }

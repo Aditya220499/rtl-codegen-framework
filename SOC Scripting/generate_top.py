@@ -8,91 +8,77 @@ INPUT_FILE = os.path.join(BASE_DIR, "input", "ip_description.json")
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 OUTPUT_FILE = os.path.join(BASE_DIR, "output", "top_generated.sv")
 
-COMMON_SIGNALS = ["clk", "rst_n"]
-
 
 def load_metadata():
     with open(INPUT_FILE) as f:
         return json.load(f)
 
 
-def collect_nets(ips):
+def analyze_connectivity(ips):
     """
-    Generate nets.
-    - Shared nets for common signals (clk, rst_n)
-    - Unique nets for other ports
+    Build connectivity graph based on port names.
+    Enforce:
+    - Exactly one output per shared signal
+    - Width consistency
     """
-    nets = {}
 
-    for ip in ips:
-        for port in ip["ports"]:
-            name = port["name"]
-            width = port["width"]
-
-            if name in COMMON_SIGNALS:
-                # Shared net
-                if name not in nets:
-                    nets[name] = width
-                else:
-                    if nets[name] != width:
-                        raise ValueError(f"Width mismatch on shared signal '{name}'")
-            else:
-                # Unique per instance
-                net_name = f"{ip['instance']}__{name}"
-                nets[net_name] = width
-
-    return [{"name": k, "width": v} for k, v in nets.items()]
-
-
-def validate_drivers(ips):
-    """
-    Ensure no multiple outputs drive same shared signal.
-    """
     signal_map = {}
 
     for ip in ips:
         for port in ip["ports"]:
             name = port["name"]
-            direction = port["dir"]
 
-            if name in COMMON_SIGNALS:
-                if name not in signal_map:
-                    signal_map[name] = []
+            if name not in signal_map:
+                signal_map[name] = []
 
-                signal_map[name].append(direction)
+            signal_map[name].append({
+                "instance": ip["instance"],
+                "dir": port["dir"],
+                "width": port["width"]
+            })
 
-    for signal, directions in signal_map.items():
-        if directions.count("output") > 1:
-            raise ValueError(f"Multiple drivers detected on shared signal '{signal}'")
+    nets = []
+    connection_map = {}
 
+    for signal, entries in signal_map.items():
 
-def validate_widths(ips):
-    """
-    Ensure shared signals have matching widths.
-    """
-    signal_widths = {}
+        widths = set(e["width"] for e in entries)
+        if len(widths) > 1:
+            raise ValueError(f"Width mismatch on signal '{signal}'")
 
-    for ip in ips:
-        for port in ip["ports"]:
-            name = port["name"]
-            width = port["width"]
+        outputs = [e for e in entries if e["dir"] == "output"]
+        inputs = [e for e in entries if e["dir"] == "input"]
 
-            if name in COMMON_SIGNALS:
-                if name not in signal_widths:
-                    signal_widths[name] = width
-                else:
-                    if signal_widths[name] != width:
-                        raise ValueError(f"Width mismatch on shared signal '{name}'")
+        if len(entries) == 1:
+            # isolated signal
+            e = entries[0]
+            net_name = f"{e['instance']}__{signal}"
+            nets.append({"name": net_name, "width": e["width"]})
+            connection_map[(e["instance"], signal)] = net_name
+
+        else:
+            # shared signal
+            if len(outputs) == 0:
+                raise ValueError(f"No driver found for shared signal '{signal}'")
+
+            if len(outputs) > 1:
+                raise ValueError(f"Multiple drivers detected on signal '{signal}'")
+
+            # valid shared connection
+            net_name = signal
+            nets.append({"name": net_name, "width": outputs[0]["width"]})
+
+            for e in entries:
+                connection_map[(e["instance"], signal)] = net_name
+
+    return nets, connection_map
 
 
 def main():
     data = load_metadata()
     ips = data["ips"]
 
-    validate_drivers(ips)
-    validate_widths(ips)
-
-    nets = collect_nets(ips)
+    nets, connection_map = analyze_connectivity(ips)
 
     env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
     template = env.get_template("top_template.sv.j2")
@@ -100,7 +86,7 @@ def main():
     output = template.render(
         ips=ips,
         nets=nets,
-        common_signals=COMMON_SIGNALS
+        connection_map=connection_map
     )
 
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)

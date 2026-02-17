@@ -10,7 +10,7 @@ logic{% if net.width > 1 %} [{{ net.width - 1 }}:0]{% endif %} {{ net.name }};
 // Instance: {{ ip.instance }}
 {{ ip.module }} {{ ip.instance }} (
 {% for port in ip.ports -%}
-    .{{ port.name }}({% if port.name in common_signals %}{{ port.name }}{% else %}{{ ip.instance }}__{{ port.name }}{% endif %}){% if not loop.last %},{% endif %}
+    .{{ port.name }}({{ connection_map[(ip.instance, port.name)] }}){% if not loop.last %},{% endif %}
 {% endfor %}
 );
 
