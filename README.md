@@ -1,6 +1,10 @@
 **********************************************************************************************************************************************************************************
 # SoC Integration Automation
 
+![CI](https://github.com/Aditya220499/rtl-codegen-framework/actions/workflows/ci.yml/badge.svg)
+
+---
+
 ## Overview
 
 This project demonstrates metadata-driven automation of SoC IP integration.
@@ -11,7 +15,9 @@ Instead of manually wiring vendor IP blocks, this tool:
 - Automatically connects signals based on matching port names
 - Validates direction-based driver ownership
 - Detects width mismatches
+- Supports top-level external signals (e.g., `clk`, `rst_n`)
 - Generates synthesizable SystemVerilog top-level RTL
+- Produces a connectivity report for visibility
 
 This reflects modern SoC integration workflows used in semiconductor product companies.
 
@@ -29,7 +35,11 @@ soc-integration-automation/
 │   ├── scenario_valid.json
 │   └── scenario_error.json
 ├── output/
-│   └── top_generated.sv
+│   ├── top_generated.sv
+│   └── connectivity_report.txt
+├── .github/
+│   └── workflows/
+│       └── ci.yml
 └── README.md
 ```
 
@@ -37,7 +47,9 @@ soc-integration-automation/
 
 ## Input Format
 
-Each JSON file defines IP blocks:
+Each JSON file defines IP blocks and their ports.
+
+Example:
 
 ```json
 {
@@ -90,17 +102,18 @@ or
 python generate_top.py scenarios/scenario_error.json
 ```
 
-Output will be generated at:
+Generated outputs:
 
 ```
 output/top_generated.sv
+output/connectivity_report.txt
 ```
 
 ---
 
 ## Demonstration Scenarios
 
-### 1. Error Case – Multi-Driver Detection
+### 1️⃣ Error Case – Multi-Driver Detection
 
 ```
 python generate_top.py scenarios/scenario_error.json
@@ -116,7 +129,7 @@ Demonstrates electrical topology validation.
 
 ---
 
-### 2. Valid SoC Connectivity
+### 2️⃣ Valid SoC Connectivity
 
 ```
 python generate_top.py scenarios/scenario_valid.json
@@ -125,13 +138,65 @@ python generate_top.py scenarios/scenario_valid.json
 Generated RTL demonstrates:
 
 - One driver per shared signal
-- Automatic input/output wiring
+- Automatic inter-block connectivity
 - Width consistency enforcement
 - Safe electrical topology
 
+Connectivity report summarizes:
+
+- Drivers
+- Consumers
+- External signals
+- Signal ownership
+
 ---
 
-## Why This Matters
+## Continuous Integration (CI)
+
+This repository includes a GitHub Actions workflow.
+
+On every push or pull request:
+
+- Valid scenario must generate RTL successfully
+- Error scenario must fail (multi-driver detection)
+- Output RTL file must exist
+- Connectivity report must be generated
+
+This ensures structural and electrical correctness is automatically verified.
+
+---
+
+## Why CI Matters in VLSI Automation
+
+In hardware design, integration errors are expensive.
+
+Common integration mistakes include:
+
+- Multiple drivers on a net
+- Width mismatches
+- Undriven inputs
+- Incorrect signal ownership
+- Broken top-level connectivity
+
+Without automation, these errors may only be discovered:
+
+- During simulation
+- During synthesis
+- During late integration
+- Or worse — after silicon tape-out
+
+CI provides:
+
+- Early detection of structural bugs
+- Regression protection when code evolves
+- Confidence in tool correctness
+- Automated validation on every commit
+
+In modern semiconductor workflows, automation and CI are critical for scalable SoC development.
+
+---
+
+## Why This Project Matters
 
 Modern SoCs integrate many third-party IP blocks.
 
@@ -144,6 +209,7 @@ This automation framework enables:
 - Early detection of structural design errors
 - Regeneration when metadata changes
 - Improved integration reliability
+- Infrastructure-level verification discipline
 
 ---
 
@@ -153,9 +219,7 @@ This automation framework enables:
 - Arbitration detection
 - Unconnected port warnings
 - Bus protocol abstraction (AXI/APB)
-- CI-based regression validation
 - IP-XACT support
-
-
+- Graph-based connectivity visualization
 
 **********************************************************************************************************************************************************************************
