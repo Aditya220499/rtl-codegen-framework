@@ -63,7 +63,8 @@ def load_metadata():
 
 def analyze_connectivity(ips):
     """
-    Analyze signal connectivity across IP blocks.
+
+    Analyze signal connectivity across IP blocks and basic validation.
 
     Rules:
     - If only one instance has a signal → isolated net
@@ -95,6 +96,7 @@ def analyze_connectivity(ips):
 
     # Process each signal group
     for signal, entries in signal_map.items():
+        # print("check--> ", signal, entries)  
 
         # ---------------------------
         # Width Validation
@@ -105,7 +107,10 @@ def analyze_connectivity(ips):
 
         outputs = [e for e in entries if e["dir"] == "output"]
         inputs = [e for e in entries if e["dir"] == "input"]
-
+        # print(signal, entries)
+        # print("check inputs --> ",inputs)
+        # print("check outputs--> ",outputs)
+        # print()
         # ---------------------------
         # Case 1: Signal exists in only one IP
         # ---------------------------
@@ -119,7 +124,7 @@ def analyze_connectivity(ips):
             })
 
             connection_map[(e["instance"], signal)] = net_name
-
+        
         # ---------------------------
         # Case 2: Shared signal
         # ---------------------------
@@ -157,6 +162,8 @@ def analyze_connectivity(ips):
             for e in entries:
                 connection_map[(e["instance"], signal)] = net_name
 
+    print(nets)
+    print(connection_map)
     return nets, connection_map
 
 
