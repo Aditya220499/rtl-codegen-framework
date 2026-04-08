@@ -1,5 +1,5 @@
 **********************************************************************************************************************************************************************************
-# SoC Integration Automation 
+# SoC Integration Automation
 
 ![CI](https://github.com/Aditya220499/rtl-codegen-framework/actions/workflows/ci.yml/badge.svg)
 
